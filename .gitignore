@@ -1,2 +1,3 @@
 architecture.excalidraw
 backend/myenv/
+.env
