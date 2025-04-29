@@ -1,0 +1,77 @@
+import React, { useState } from 'react';
+import { FiSend } from 'react-icons/fi';
+import './App.css';
+
+const ChatInterface = () => {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    const newMessage = {
+      sender: 'user',
+      text: input,
+    };
+
+    setMessages([...messages, newMessage]);
+    setInput('');
+
+    // Mock AI response (you'll replace this with backend call)
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'ai',
+          text: 'This is a mock AI response to: ' + newMessage.text,
+        },
+      ]);
+    }, 800);
+  };
+
+  return (
+    <div className='flex flex-col h-screen bg-gray-100'>
+      {/* Header */}
+      <div className='p-4 bg-white shadow flex justify-between items-center'>
+        <h1 className='text-xl font-bold text-gray-800'>AI Chat</h1>
+        <div className='text-sm text-gray-500'>demo.pdf</div>
+      </div>
+
+      {/* Chat Area */}
+      <div className='flex-1 overflow-y-auto p-4 space-y-4'>
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`max-w-xl px-4 py-2 rounded-lg ${
+              msg.sender === 'user'
+                ? 'bg-purple-100 self-end ml-auto text-right'
+                : 'bg-green-100 self-start'
+            }`}
+          >
+            <p className='text-gray-800'>{msg.text}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Input Bar */}
+      <div className='p-4 bg-white shadow flex items-center gap-3'>
+        <input
+          type='text'
+          placeholder='Send a message...'
+          className='flex-1 p-3 border border-gray-300 rounded-lg outline-none'
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+        />
+        <button
+          onClick={handleSend}
+          className='bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700'
+        >
+          <FiSend size={20} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ChatInterface;
