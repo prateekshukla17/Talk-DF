@@ -10,34 +10,39 @@ if __name__ == "__main__":
 
 
     text = pdf_bot.extract_text(pdf_path)
+    print(text)
     if not text:
         print("Failed to extract text from PDF.")
         exit()
+    
 
-    # Step 3: Create vector store
-    document_id = "001"  # You can use timestamp or unique IDs here too
     vectorstore = pdf_bot.createVectorEmbeddings(text)
+    print('vectorStore Created')
     if not vectorstore:
         print("Failed to create vectorstore.")
         exit()
 
+    
+    convoChain = pdf_bot.getConversationChainTwo(vectorstore)
+    if not convoChain:
+        print('Failed To Create the ConvoChain')
+        exit()
+    else:
+        print('Sucessfully created convoChain')
 
-    # Step 5: Start chatting with the PDF
-    print("\n✅ PDF processed! You can now ask questions about it.")
+
+
+    print("\n PDF processed! ask questions about it.")
     print("Type 'exit' to quit.\n")
 
     while True:
         question = input("You: ")
         if question.lower() in ["exit", "quit"]:
-            print("Goodbye! 👋")
+            print("Goodbye!")
             break
 
-        response = pdf_bot.handle_question(vectorstore, question)
+        response = pdf_bot.handle_userInput(convoChain, question)
         if response:
             print(f"\nBot: {response['answer']}\n")
-            print(f"Sources:")
-            for idx, source in enumerate(response['sources'], 1):
-                print(f"  [{idx}] {source}")
-            print("\n" + "-"*50 + "\n")
         else:
             print("Something went wrong when answering. Try again!")

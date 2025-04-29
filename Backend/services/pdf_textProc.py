@@ -3,8 +3,13 @@ import fitz
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import HuggingFaceHub
 from langchain_community.vectorstores import FAISS
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama.llms import OllamaLLM
 
 load_dotenv()
 class pdf_processing:
@@ -16,7 +21,8 @@ class pdf_processing:
         os.makedirs(self.vector_dir, exist_ok=True)
 
         self.embeddings = HuggingFaceEmbeddings(model_name="hkunlp/instructor-xl")
-        self.llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
+        self.llm = OllamaLLM(model="llama3.2:3b")
+        #self.llm = HuggingFaceHub(repo_id="google/gemma-3-1b-pt", model_kwargs={"temperature":0.5, "max_length":512})
 
 
     def extract_text(self, file_path):
@@ -46,65 +52,61 @@ class pdf_processing:
         except Exception as e:
             print(f"Error Creating a vector Store: {e}")
             return None
-        
-    # def get_conversation_chain(self, vectorstore):
-    #     llm = self.llm
-    #     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    #     conversation_chain = ConversationalRetrievalChain(
-    #         llm=llm,
-    #         retriever=vectorstore.as_retriever(search_kwargs={"k":3}),
-    #         memory=memory,
-    #         return_source_documents=True
-    #     )
-    #     return conversation_chain
-    # def get_retrieval_chain(self, vectorstore):
-    #     print('now in the get retrieval chain')
-    #     llm = self.llm
-    #     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
-    #     prompt = PromptTemplate.from_template(
-    #         "Answer the question based on the context provided. \n\nContext: {context}\n\nQuestion: {question}\n\nAnswer:"
-    #     )
-    #     combine_docs_chain = create_stuff_documents_chain(llm, prompt)
-    #     retrieval_chain = create_retrieval_chain(
-    #         retriever=retriever,
-    #         combine_docs_chain=combine_docs_chain,
-    #     )
-    #     print('retrieval chain created')
-
-    #     return retrieval_chain
-
-    # def handle_question(self, vectorstore, question):
+    # def getConversationChain(self,vectorStore):
     #     try:
-    #         retrieval_chain = self.get_retrieval_chain(vectorstore)
-    #         result = retrieval_chain.invoke({"question": question})
-            
-    #         return {
-    #             "answer": result["answer"],
-    #             "sources": [doc.page_content[:200] + "..." for doc in result["source_documents"]]
-    #         }
+    #         memory = ConversationBufferMemory(memory_key='chat_history',return_messages=True)
+    #         conversation_chain = ConversationalRetrievalChain.from_llm(
+    #         llm=self.llm,
+    #         retriever=vectorStore.as_retriever(search_kwargs={"k": 3}),
+    #         memory=memory
+    #     )
+    #         return conversation_chain
     #     except Exception as e:
-    #         print(f'Error handling the question: {e}')
+    #         print(f'Error Creating the convo chain :{e}')
     #         return None
+    
 
+    def getConversationChainTwo(self,vectorStore):
+        try:
+            retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
+            llm = self.llm
+            system_prompt = (
+            "Use the given context to answer the question. "
+            "If you don't know the answer, say you don't know. "
+            "Use three sentence maximum and keep the answer concise. "
+            "Context: {context}"
+            )
+            prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt),
+                ("human", "{input}"),
+            ]
+            )
+            question_answer_chain = create_stuff_documents_chain(llm, prompt)
+            chain = create_retrieval_chain(retriever,question_answer_chain)
+
+            return chain
+        except Exception as e:
+            print(f"Error Creating the chain: {e}")
+            return None
         
-    # def answer_question(self,vectorstore,question):
-    #     try:
-    #         retriever = vectorstore.as_retriever(search_kwargs={"k":3})
 
-    #         qa_chain = retrieval_qa.from_chain_type(
-    #             llm = self.llm,
-    #             chain_type = 'stuff',
-    #             retriever = retriever,
-    #             return_source_documents = True
-    #         )
+    
+    def handle_userInput(self,conversatioChain,question):
+        try:
+            qa_chain = conversatioChain
 
-    #         result = qa_chain({"query":question})
-            
-    #         return {
-    #             "answer": result["result"],
-    #             "sources": [doc.page_content[:200] + "..." for doc in result["source_documents"]]
-    #         }
-    #     except Exception as e:
-    #         print(f'Error answering the question: {e}')
-    #         return None
+            result = qa_chain.invoke({"input":question})
+            # raw_answer = result["answer"]
+            # cleaned_answer = re.sub(r"<think>.*?</think>", "", raw_answer, flags=re.DOTALL).strip()
+
+
+
+            return {
+                "answer": result["answer"]
+            }
+        except Exception as e:
+            print(f'Error answering the question:{e}')
+            return {"answer":f'Error Processing your question:{str(e)}'}
+    
