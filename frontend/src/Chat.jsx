@@ -43,7 +43,7 @@ const ChatInterface = () => {
       const data = await response.json();
       const aiMessage = {
         sender: 'AI',
-        text: data.answerit || 'No response recieved',
+        text: data.answeris || 'No response recieved',
       };
 
       setMessages((prev) => [...prev.slice(0, -1), aiMessage]);

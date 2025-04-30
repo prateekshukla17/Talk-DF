@@ -44,6 +44,8 @@ async def process_pdf(file:UploadFile=File(...)):
         conversation_chain = pdf_handler.getConversationChainTwo(vector_store)
         if not conversation_chain:
             raise HTTPException(status_code=500, detail="Failed to the convo chain")
+        else:
+            print('ConvoChain Created')
         
         return {"message": "ConvoChain and vector store created successfully."}
     except Exception as e:
@@ -62,6 +64,10 @@ async def ask_question(payload: QuestionRequest):
     
     try:
         response = pdf_handler.handle_userInput(conversation_chain,payload.question)
+        if not response:
+            raise HTTPException(status_code=500,details='Failed with response')
+        else:
+            print(response['answer'])
         answer = response['answer']
         return {"answeris":answer}
     except Exception as e:

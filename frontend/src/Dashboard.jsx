@@ -40,13 +40,6 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
   const handleProcess = async (file) => {
-    const docId = file.id;
-    const url = `${window.location.origin}/chat/${docId}`;
-    window.open(url, '_black');
-    navigate(`/chat/${file.id}`, {
-      state: { filename: file.name },
-    });
-
     const formData = new FormData();
     setProcessingFileId(file.id);
 
@@ -59,8 +52,6 @@ const Dashboard = () => {
       if (!response.ok) throw new Error('Upload Failed');
       else {
         const data = await response.json();
-        const url = `${window.location.origin}/chat/${docId}`;
-        window.open(url, '_black');
         navigate(`/chat/${file.id}`, {
           state: { filename: file.name },
         });
