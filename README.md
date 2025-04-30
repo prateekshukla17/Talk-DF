@@ -119,6 +119,14 @@ npm run dev
 
 - OpenAI Integration (Optional): Using OpenAI’s hosted models (via API) significantly improves response time and output quality, but may require a valid API key and incurs usage costs.
 
+## 📌 Note to Reviewer
+
+I’d like to sincerely request your understanding regarding the runtime performance shown in my demo video. Due to hardware limitations — I’m currently working on an older, low-spec laptop — the locally hosted AI models (for embedding and response generation) take longer than expected to process queries.
+
+While the core functionality and code logic are fully implemented and correct, the slower runtime is purely a result of limited system resources. If this application were integrated with a production-grade LLM like OpenAI (which I avoided due to cost), the response time and user experience would have been significantly faster.
+
+I am planning to upgrade to a new machine by next month and will re-optimize performance and deploy the app using hosted models. Thank you for your patience and consideration.
+
 ## Author
 
 Prateek Shukla
