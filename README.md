@@ -1,4 +1,4 @@
-#Talk-DF
+# Talk-DF
 
 A full-stack AI-powered web application that allows users to upload PDF documents and ask questions based on their content using RAG (Retrieval-Augmented Generation) with LangChain and LLM integration.
 
@@ -80,7 +80,8 @@ npm run dev
 ## API Endpoint
 
 `POST /process`
--Accepts: PDF File
+
+- Accepts: PDF File
 
 - Action: Extracts text, creates vector embeddings, initializes conversation chain
 
