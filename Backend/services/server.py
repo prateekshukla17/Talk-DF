@@ -24,7 +24,7 @@ UPLOAD_DIR = pdf_handler.upload_dir
 
 @app.post("/process")
 async def process_pdf(file:UploadFile=File(...)):
-    global vector_store, conversation_chain
+    global vector_store
 
     try:
         file_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -32,35 +32,40 @@ async def process_pdf(file:UploadFile=File(...)):
             shutil.copyfileobj(file.file,buffer)
         
         text = pdf_handler.extract_text(file_path)
-        print(text)
         if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from PDF.")
-        # vector_store = pdf_handler.createVectorEmbeddings(text)
+        vector_store = pdf_handler.createVectorEmbeddings(text)
 
-        # if not vector_store:
-        #     raise HTTPException(status_code=500, detail="Failed to create vector embeddings.")
-        
-        # conversation_chain = pdf_handler.getConversationChainTwo(vector_store)
-        # if not conversation_chain:
-        #     raise HTTPException(status_code=500, detail="Failed to initialize LLM chain.")
+        if not vector_store:
+            raise HTTPException(status_code=500, detail="Failed to create vector embeddings.")
+        else:
+            print('Vecstore Created sucessfully')
         
         return {"message": "PDF processed and vector store created successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# class QuestionRequest(BaseModel):
-#     question: str
+class QuestionRequest(BaseModel):
+    question: str
 
-# @app.post("/ask")
-# async def ask_question(payload: QuestionRequest):
-#     global conversation_chain
+@app.post("/ask")
+async def ask_question(payload: QuestionRequest):
+    global conversation_chain, vector_store
 
-#     if not conversation_chain:
-#         raise HTTPException(status_code=400,detail="No Document processed yet")
+    if not vector_store:
+        raise HTTPException(status_code=400, detail="Failed to load the vector Store")
     
-#     try:
-#         response = pdf_handler.handle_userInput(conversation_chain,payload.question)
-#         return response
-#     except Exception as e:
-#         raise HTTPException(status_code=500,detail=str(e))
+    conversation_chain = pdf_handler.getConversationChainTwo(vector_store)
+    if not conversation_chain:
+        raise HTTPException(status_code=500,detail='Failed to created convo chain')
+
+    if not conversation_chain:
+        raise HTTPException(status_code=400,detail="No Document processed yet")
+    
+    try:
+        response = pdf_handler.handle_userInput(conversation_chain,payload.question)
+        answer = response['answer']
+        return {"answeris":answer}
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
