@@ -7,6 +7,6 @@ import ChatInterface from './Chat.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ChatInterface />
+    <App />
   </StrictMode>
 );

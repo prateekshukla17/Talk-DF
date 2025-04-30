@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { FiSend } from 'react-icons/fi';
+import { useParams, useLocation } from 'react-router-dom';
 import './App.css';
 
 const ChatInterface = () => {
+  const { docId } = useParams();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const location = useLocation();
+
+  const filename = location.state?.filename || 'demo.pdf';
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -33,8 +38,8 @@ const ChatInterface = () => {
     <div className='flex flex-col h-screen bg-gray-100'>
       {/* Header */}
       <div className='p-4 bg-white shadow flex justify-between items-center'>
-        <h1 className='text-xl font-bold text-gray-800'>AI Chat</h1>
-        <div className='text-sm text-gray-500'>demo.pdf</div>
+        <h1 className='text-xl font-bold text-gray-800'>PDF_Talk</h1>
+        <div className='text-sm text-gray-500'>{filename}</div>
       </div>
 
       {/* Chat Area */}

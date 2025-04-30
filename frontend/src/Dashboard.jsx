@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 const Dashboard = () => {
   const [uploadedFiles, setUploadedFiles] = useState([
@@ -26,6 +27,7 @@ const Dashboard = () => {
         id: uploadedFiles.length + 1,
         name: file.name,
         date: new Date().toISOString().split('T')[0],
+        file: file,
       };
       setUploadedFiles([...uploadedFiles, newFile]);
     }
@@ -35,9 +37,28 @@ const Dashboard = () => {
     setUploadedFiles(uploadedFiles.filter((file) => file.id !== id));
   };
 
-  const handleProcess = (file) => {
-    console.log('Processing file:', file.name);
-    // Call your backend API here
+  const navigate = useNavigate();
+  const handleProcess = async (file) => {
+    const docId = file.id;
+    // const url = `${window.location.origin}/chat/${docId}`;
+    // window.open(url, '_black');
+    // navigate(`/chat/${file.id}`, {
+    //   state: { filename: file.name },
+    // });
+
+    const formData = new FormData();
+
+    try {
+      formData.append('file', file.file);
+      const response = await fetch('http://127.0.0.1:8000/process', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Upload Failed');
+      const data = await response.json();
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (

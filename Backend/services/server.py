@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import shutil
 import os
-from pdf_talk.Backend.services.pdf_textProc import pdf_processing
+from pdf_textProc import pdf_processing
 app = FastAPI()
 
 
@@ -32,21 +32,35 @@ async def process_pdf(file:UploadFile=File(...)):
             shutil.copyfileobj(file.file,buffer)
         
         text = pdf_handler.extract_text(file_path)
+        print(text)
         if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from PDF.")
-        vector_store = pdf_handler.createVectorEmbeddings(text)
+        # vector_store = pdf_handler.createVectorEmbeddings(text)
 
-        if not vector_store:
-            raise HTTPException(status_code=500, detail="Failed to create vector embeddings.")
+        # if not vector_store:
+        #     raise HTTPException(status_code=500, detail="Failed to create vector embeddings.")
         
-        conversation_chain = pdf_handler.getConversationChainTwo(vector_store)
-        if not conversation_chain:
-            raise HTTPException(status_code=500, detail="Failed to initialize LLM chain.")
+        # conversation_chain = pdf_handler.getConversationChainTwo(vector_store)
+        # if not conversation_chain:
+        #     raise HTTPException(status_code=500, detail="Failed to initialize LLM chain.")
         
         return {"message": "PDF processed and vector store created successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-class QuestionRequest(BaseModel):
-    question: str
+# class QuestionRequest(BaseModel):
+#     question: str
+
+# @app.post("/ask")
+# async def ask_question(payload: QuestionRequest):
+#     global conversation_chain
+
+#     if not conversation_chain:
+#         raise HTTPException(status_code=400,detail="No Document processed yet")
+    
+#     try:
+#         response = pdf_handler.handle_userInput(conversation_chain,payload.question)
+#         return response
+#     except Exception as e:
+#         raise HTTPException(status_code=500,detail=str(e))
