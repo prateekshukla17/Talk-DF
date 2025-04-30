@@ -13,22 +13,27 @@ const ChatInterface = () => {
 
   const filename = location.state?.filename || 'demo.pdf';
 
+  // Handle sending user question to the backend and receiving AI respons
   const handleSend = async () => {
+    // Don't send if input is empty or only spaces
     if (!input.trim()) return;
 
+    // Create a new user message object
     const newMessage = {
       sender: 'user',
       text: input,
     };
 
+    // Add user message to chat and clear input
     setMessages([...messages, newMessage]);
     setInput('');
     setLoading(true);
+    // Add temporary typing indicator from AI while waiting for backend response
     const typingMessage = { sender: 'ai', text: 'AI is typing...' };
     setMessages((prev) => [...prev, typingMessage]);
 
-    // Mock AI response (you'll replace this with backend call)
     try {
+      // Send user question to backend API
       const response = await fetch('http://127.0.0.1:8000/ask', {
         method: 'POST',
         headers: {
@@ -41,6 +46,7 @@ const ChatInterface = () => {
         throw new Error('Failed to get the Response from the server');
       }
       const data = await response.json();
+      // Replace typing message with actual AI response
       const aiMessage = {
         sender: 'AI',
         text: data.answeris || 'No response recieved',
@@ -48,6 +54,7 @@ const ChatInterface = () => {
 
       setMessages((prev) => [...prev.slice(0, -1), aiMessage]);
     } catch (error) {
+      // Handling any errors during the API call
       console.error('Error during /ask', error);
       setMessages((prev) => [
         ...prev,
@@ -57,6 +64,7 @@ const ChatInterface = () => {
         },
       ]);
     } finally {
+      // Reseting loading state
       setLoading(false);
     }
   };
@@ -69,7 +77,7 @@ const ChatInterface = () => {
         <div className='text-sm text-gray-500'>{filename}</div>
       </div>
 
-      {/* Chat Area */}
+      {/* Chatting Area */}
       <div className='flex-1 overflow-y-auto p-4 space-y-4'>
         {messages.map((msg, index) => (
           <div

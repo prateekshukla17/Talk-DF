@@ -14,51 +14,55 @@ const Dashboard = () => {
       name: 'SAMPLEPDF2.pdf',
       date: '2024-04-29',
     },
-    {
-      id: 3,
-      name: 'SAMPLEPDF3.pdf',
-      date: '2024-04-28',
-    },
   ]);
 
+  // Handle file upload and store file metadata in state
   const handleUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       const newFile = {
-        id: uploadedFiles.length + 1,
-        name: file.name,
+        id: uploadedFiles.length + 1, // Unique ID for each uploaded file
+        name: file.name, // File name
         date: new Date().toISOString().split('T')[0],
-        file: file,
+        file: file, // Actual file object to pass to the backend
       };
-      setUploadedFiles([...uploadedFiles, newFile]);
+      setUploadedFiles([...uploadedFiles, newFile]); // Add new file to state
     }
   };
-
+  // Handle file delete by removing file from state using ID
   const handleDelete = (id) => {
     setUploadedFiles(uploadedFiles.filter((file) => file.id !== id));
   };
 
+  // Navigate hook to redirect user after successful processing
   const navigate = useNavigate();
+
+  // Handle PDF processing: upload file to backend and navigate to chat page
   const handleProcess = async (file) => {
-    const formData = new FormData();
-    setProcessingFileId(file.id);
+    const formData = new FormData(); // Prepare form data for file upload
+    setProcessingFileId(file.id); // Set loading state for UI feedback
 
     try {
       formData.append('file', file.file);
+
+      // Send POST request to backend API to process PDF
       const response = await fetch('http://127.0.0.1:8000/process', {
         method: 'POST',
         body: formData,
       });
       if (!response.ok) throw new Error('Upload Failed');
       else {
+        // On success, navigate to chat route with file info
         const data = await response.json();
         navigate(`/chat/${file.id}`, {
           state: { filename: file.name },
         });
       }
     } catch (error) {
+      // Handle upload errors
       console.error('Error:', error);
     } finally {
+      // Reset loading state
       setProcessingFileId(null);
     }
   };
@@ -111,7 +115,7 @@ const Dashboard = () => {
                       {processingFileId === file.id ? (
                         <>
                           <svg
-                            className='animate-spin h-4 w-4 text-white'
+                            className='animate-spin h-3 w-3 text-white'
                             xmlns='http://www.w3.org/2000/svg'
                             fill='none'
                             viewBox='0 0 24 24'
