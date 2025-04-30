@@ -6,6 +6,7 @@ import ChatInterface from './Chat';
 
 function App() {
   return (
+    //Added Routing to navigate from Dashboard-> to -> Chatroom
     <Router>
       <Routes>
         <Route path='/' element={<Dashboard />} />

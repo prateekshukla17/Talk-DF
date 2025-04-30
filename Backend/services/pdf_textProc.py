@@ -94,6 +94,7 @@ class pdf_processing:
             Exception: Logs and handles any exceptions that occur during the chain creation process.
         """
         try:
+            #searches for top 3 most relavant docs in the vector database
             retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
             llm = self.llm
             system_prompt = (
