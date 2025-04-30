@@ -7,11 +7,13 @@ const ChatInterface = () => {
   const { docId } = useParams();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const location = useLocation();
 
   const filename = location.state?.filename || 'demo.pdf';
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const newMessage = {
@@ -21,17 +23,42 @@ const ChatInterface = () => {
 
     setMessages([...messages, newMessage]);
     setInput('');
+    setLoading(true);
+    const typingMessage = { sender: 'ai', text: 'AI is typing...' };
+    setMessages((prev) => [...prev, typingMessage]);
 
     // Mock AI response (you'll replace this with backend call)
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: input }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get the Response from the server');
+      }
+      const data = await response.json();
+      const aiMessage = {
+        sender: 'AI',
+        text: data.answerit || 'No response recieved',
+      };
+
+      setMessages((prev) => [...prev.slice(0, -1), aiMessage]);
+    } catch (error) {
+      console.error('Error during /ask', error);
       setMessages((prev) => [
         ...prev,
         {
-          sender: 'ai',
-          text: 'This is a mock AI response to: ' + newMessage.text,
+          sender: 'AI',
+          text: 'Error with the message' + error.message,
         },
       ]);
-    }, 800);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

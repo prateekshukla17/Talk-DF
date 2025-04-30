@@ -24,7 +24,7 @@ UPLOAD_DIR = pdf_handler.upload_dir
 
 @app.post("/process")
 async def process_pdf(file:UploadFile=File(...)):
-    global vector_store
+    global vector_store, conversation_chain
 
     try:
         file_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -40,8 +40,12 @@ async def process_pdf(file:UploadFile=File(...)):
             raise HTTPException(status_code=500, detail="Failed to create vector embeddings.")
         else:
             print('Vecstore Created sucessfully')
+
+        conversation_chain = pdf_handler.getConversationChainTwo(vector_store)
+        if not conversation_chain:
+            raise HTTPException(status_code=500, detail="Failed to the convo chain")
         
-        return {"message": "PDF processed and vector store created successfully."}
+        return {"message": "ConvoChain and vector store created successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -51,17 +55,10 @@ class QuestionRequest(BaseModel):
 
 @app.post("/ask")
 async def ask_question(payload: QuestionRequest):
-    global conversation_chain, vector_store
-
-    if not vector_store:
-        raise HTTPException(status_code=400, detail="Failed to load the vector Store")
-    
-    conversation_chain = pdf_handler.getConversationChainTwo(vector_store)
-    if not conversation_chain:
-        raise HTTPException(status_code=500,detail='Failed to created convo chain')
+    global conversation_chain
 
     if not conversation_chain:
-        raise HTTPException(status_code=400,detail="No Document processed yet")
+        raise HTTPException(status_code=400,detail="No Chains available")
     
     try:
         response = pdf_handler.handle_userInput(conversation_chain,payload.question)
