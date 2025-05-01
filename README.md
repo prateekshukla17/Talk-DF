@@ -101,11 +101,11 @@ npm run dev
 
 - Vector embeddings are created using LangChain
 
-- Vectors are stored in memory (Chroma / FAISS)
+- Vectors are stored in memory (FAISS)
 
 - User sends a question → LangChain retrieves relevant chunks using similarity search
 
-- LLM (like OpenAI) generates the final response
+- LLM (llama 3.2) generates the final response
 
 - Response is displayed in the chat UI
 
