@@ -34,9 +34,7 @@ A full-stack AI-powered web application that allows users to upload PDF document
 
 - ChromaDB / FAISS (for vector embeddings)
 
-- OpenAI / LLM API (via LangChain)
-
-- SQLite (for storing metadata)
+- LLM : llama 3.2
 
 ## File Structure
 
