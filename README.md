@@ -32,7 +32,7 @@ A full-stack AI-powered web application that allows users to upload PDF document
 
 - PyMuPDF (for PDF text extraction)
 
-- ChromaDB / FAISS (for vector embeddings)
+- FAISS (for vector embeddings)
 
 - LLM : llama 3.2
 
