@@ -9,7 +9,7 @@ from langchain.chains import create_retrieval_chain # retrieval-based chain for 
 from langchain.chains.combine_documents import create_stuff_documents_chain #Combines documents into a chain for processing.
 from langchain_core.prompts import ChatPromptTemplate #Defines a prompt template for chat-based interactions.
 from langchain_ollama.llms import OllamaLLM #Language Model used
-
+from langchain_ollama import OllamaEmbeddingss
 
 warnings.filterwarnings("ignore")
 
@@ -23,7 +23,7 @@ class pdf_processing:
         os.makedirs(self.upload_dir, exist_ok=True)
         os.makedirs(self.vector_dir, exist_ok=True)
 
-        self.embeddings = HuggingFaceEmbeddings(model_name="hkunlp/instructor-xl")
+        self.embeddings = OllamaEmbeddingss(model="llama3.2:3b")
         self.llm = OllamaLLM(model="llama3.2:3b")
         #self.llm = HuggingFaceHub(repo_id="google/gemma-3-1b-pt", model_kwargs={"temperature":0.5, "max_length":512})
 
